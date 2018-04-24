@@ -1,5 +1,5 @@
 
-name := "temp_work"
+name := "advent2015"
 
 version := "0.1"
 
