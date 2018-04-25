@@ -1,59 +1,65 @@
 package santa
-
 import org.scalatest.{Matchers, path}
 
 class SantaDeliveryTest extends path.FunSpec with Matchers {
- 
-  val delivery = SantaDelivery
 
-  describe("null moves") {
+  describe("null moves are not allowed") {
     it("throws UnsupportedOperationException") {
       assertThrows[UnsupportedOperationException] {
-        delivery.floor(null)
+        val delivery = new SantaDelivery(null)
+        delivery.finalFloorVisited
       }
     }
   }
 
   describe("no movement") {
-    val moves = ""
+    val delivery = SantaDelivery("")
     it("keeps Santa on floor 0") {
-      delivery.floor(moves) shouldEqual 0
+      delivery.finalFloorVisited shouldEqual 0
     }
   }
 
   describe("move up") {
-    val move_one_up = "("
+    val delivery = SantaDelivery("(")
     it("puts you on floor 1") {
-      delivery.floor(move_one_up) shouldEqual 1
+      delivery.finalFloorVisited shouldEqual 1
     }
   }
 
   describe("move down") {
     val move_one_down = ")"
     it("puts you on floor -1") {
-      delivery.floor(move_one_down) shouldEqual -1
+      val delivery = SantaDelivery(move_one_down)
+      delivery.finalFloorVisited shouldEqual -1
     }
   }
 
-  describe("find basement on movements") {
+  describe("find floor in movements") {
     val moves = "(()))"
+    val delivery = SantaDelivery(moves)
+
     it("reports the first time basement was hit, when it was") {
-      val firstBasement = delivery.movement(moves).find(state => state.floor == -1)
-      firstBasement.get.position shouldBe 5
+      val firstBasement = delivery.firstTimeFloorVisited(-1)
+      firstBasement.get shouldBe 5
+    }
+
+    it("reports that the third floor was never visited") {
+      val thirdFloor = delivery.firstTimeFloorVisited(3)
+      thirdFloor shouldBe None
     }
   }
 
   describe("processing a file with moves") {
-    val fileName = "1a_input.txt"
-    val positions = delivery.movementFromFile(fileName)
+    val delivery = SantaDelivery.fromFile("1a_input.txt")
 
     it("gives the final floor") {
-      positions.last.floor shouldEqual(232)
+      val positions = delivery.finalFloorVisited
+      positions shouldEqual(232)
     }
 
     it("finds first basement run") {
-      val res = positions.find(pos => pos.floor == -1)
-      println("first basement: " + res.get.position)
+      val res = delivery.firstTimeFloorVisited(-1)
+      res.get shouldEqual 1783
     }
   }
 }
