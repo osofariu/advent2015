@@ -1,7 +1,7 @@
-package santa
+package delivery
 import scala.io.Source
 
-case class SantaDelivery(moves: String) {
+case class BuildingDelivery(moves: String) {
   def finalFloorVisited : Int = {
     if (moves == null)
       throw new UnsupportedOperationException
@@ -29,9 +29,9 @@ case class SantaDelivery(moves: String) {
   }
 }
 
-object SantaDelivery {
+object BuildingDelivery {
   def fromFile(filename: String) = {
     val moves = Source.fromFile(filename).mkString
-    SantaDelivery(moves)
+    BuildingDelivery(moves)
   }
 }

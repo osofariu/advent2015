@@ -1,13 +1,15 @@
 package wrap
 
 case class GiftBox(length: Int, width: Int, height: Int) {
+
   def wrappingSize : Int = {
     2 * length * width + 2 * length * height + 2 * width * height +
     smallestTwoDimensions.reduce((a, b) => a * b)
   }
 
   def ribbonSize : Int = {
-    smallestTwoDimensions.reduce((a, b) => 2 * a + 2 * b) + (length * width * height)
+    length * width * height +
+    smallestTwoDimensions.reduce((a, b) => 2 * a + 2 * b)
   }
 
   private def smallestTwoDimensions: List[Int] =
