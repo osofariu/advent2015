@@ -4,7 +4,17 @@ import scala.io.Source
 
 object GridDelivery {
 
-  def movesFromFile(filename: String) = {
+  def movesFromFile(filename: String): DeliveryResults = {
+    val steps = stepsFromFile(filename)
+    moves(steps)
+  }
+
+  def twinMovesFromFile(filename: String): DeliveryResults = {
+    val steps = stepsFromFile(filename)
+    twinMoves(steps)
+  }
+
+  private def stepsFromFile(filename: String) = {
     Source.fromFile(filename).mkString
   }
 
@@ -29,7 +39,6 @@ object GridDelivery {
 
     val santaDeliveries = makeMoves(santaMoves, DeliveryResults())
     val robotDeliveries = makeMoves(robotMoves, DeliveryResults())
-
-    DeliveryResults.combine(santaDeliveries, robotDeliveries).housesVisited
+    DeliveryResults.combine(santaDeliveries, robotDeliveries)
   }
 }

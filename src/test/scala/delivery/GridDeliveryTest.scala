@@ -37,8 +37,7 @@ class GridDeliveryTest extends path.FunSpec with Matchers {
 
     describe("processing steps from file") {
       it("reads moves to a string, then counts them") {
-        val moves = scala.io.Source.fromFile("3a_input.txt").mkString
-        val results = delivery.moves(moves)
+        val results = delivery.movesFromFile("3a_input.txt")
         val visited = results.housesVisited
         visited shouldEqual(2572)
       }
@@ -47,14 +46,13 @@ class GridDeliveryTest extends path.FunSpec with Matchers {
     describe("with robo-santa in the mix") {
 
       it("delivers to three houses in two moves, same axis") {
-        val total = delivery.twinMoves("<>")
-        total shouldEqual(3)
+        val results = delivery.twinMoves("<>")
+        results.housesVisited shouldEqual(3)
       }
 
       it("reads moves the same way, them tracks both santa") {
-        val moves = GridDelivery.movesFromFile("3a_input.txt")
-        val total = delivery.twinMoves(moves)
-        total shouldEqual(2631)
+        val results: DeliveryResults = delivery.twinMovesFromFile("3a_input.txt")
+        results.housesVisited shouldEqual(2631)
       }
     }
   }
