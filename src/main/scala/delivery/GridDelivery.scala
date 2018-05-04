@@ -14,7 +14,7 @@ object GridDelivery {
 
   def makeMoves(steps: String, currentResults: DeliveryResults) = {
     steps.foldLeft(currentResults)((results, step) =>
-      results.makeOneMove(step, results)
+      results.makeOneMove(step)
     )
   }
 
@@ -33,4 +33,3 @@ object GridDelivery {
     DeliveryResults.combine(santaDeliveries, robotDeliveries).housesVisited
   }
 }
-
