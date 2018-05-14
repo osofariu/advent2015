@@ -59,28 +59,31 @@ class LightsGridTest extends path.FunSpec with Matchers {
       val grid = LightsGrid(1000)
 
       it("can turn on from file") {
-        val res = grid.instruction("turn on 943,30 through 990,907")
+        val res = grid.processInstruction("turn on 943,30 through 990,907")
         res.op shouldEqual("on")
         res.lowerCoord shouldEqual((943, 30))
         res.higherCoord shouldEqual(990, 907)
       }
+
+      it("can turn off from file") {
+        val res = grid.processInstruction("turn off 3,330 through 991,407")
+        res.op shouldEqual("off")
+        res.lowerCoord shouldEqual((3, 330))
+        res.higherCoord shouldEqual(991, 407)
+      }
+      it("can toggle from file") {
+        val res = grid.processInstruction("toggle 1,2 through 3,4")
+        res.op shouldEqual("toggle")
+        res.lowerCoord shouldEqual((1, 2))
+        res.higherCoord shouldEqual(3, 4)
+      }
+    }
+
+    describe("read the instructions from file") {
+      it("reads from file into a 1,000 X 1,000 grid") {
+        val grid = LightsGrid(1000)
+        grid.instructionsFromFile("6_input.txt").lights shouldEqual(569999)
+      }
     }
   }
 }
-
-/*
-   4*3 + 5*7 = 12 + 35 =
- 100 - 47 = 53
-
-       0  3  5  7  9
-
- 0        x
-
- 3           x
-
- 5        x
-
- 7
-
- 9                 x
- */

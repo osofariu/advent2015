@@ -1,7 +1,9 @@
 package lights
 
+import scala.io.Source
 
 case class LightsGrid(dimension: Int) {
+
   private val grid = Array.ofDim[Boolean](dimension, dimension)
 
   type Coord = (Int, Int)
@@ -40,8 +42,21 @@ case class LightsGrid(dimension: Int) {
       .filter(c ⇒ grid(c._1)(c._2) == true).length
   }
 
-  def instruction(action: String) : GridInstruction = {
-    val regex = "^([a-z ]+)([0-9]+),([0-9]+) through ([0-9]+),([0-9]+)$".r
+  def instructionsFromFile(filename: String): LightsGrid = {
+    val instructions = Source.fromFile(filename).getLines()
+    instructions.foreach(instruction => {
+      val gridInstruction = processInstruction(instruction)
+      gridInstruction.op match {
+        case "on" => turnOn(gridInstruction.lowerCoord, gridInstruction.higherCoord)
+        case "off" => turnOff(gridInstruction.lowerCoord, gridInstruction.higherCoord)
+        case "toggle" => toggle(gridInstruction.lowerCoord, gridInstruction.higherCoord)
+      }
+    })
+    this
+  }
+
+  def processInstruction(action: String) : GridInstruction = {
+    val regex = "^(turn on|turn off|toggle) ([0-9]+),([0-9]+) through ([0-9]+),([0-9]+)$".r
     action match {
       case(regex(act, lowerX, lowerY, higherX, higherY)) ⇒
         GridInstruction(actionStringToAction(act),
@@ -52,8 +67,9 @@ case class LightsGrid(dimension: Int) {
   }
 
   def actionStringToAction(action: String) = action match {
-    case("turn on ") ⇒ "on"
-    case(_) ⇒ throw new UnsupportedOperationException(action)
+    case("turn on") ⇒ "on"
+    case("turn off") ⇒ "off"
+    case("toggle") => "toggle"
   }
 }
 
