@@ -1,5 +1,6 @@
 package lights
 
+
 case class LightsGrid(dimension: Int) {
   private val grid = Array.ofDim[Boolean](dimension, dimension)
 
@@ -7,9 +8,10 @@ case class LightsGrid(dimension: Int) {
   type Range = (Coord, Coord)
 
   def iter(c: Range): Seq[Coord] = {
+    val ((x1, y1), (x2, y2)) = c
     for {
-      x ← c._1._1 to c._2._1
-      y ← c._1._2 to c._2._2
+      x ← x1 to x2
+      y ← y1 to y2
     } yield (x, y)
   }
 
@@ -25,29 +27,33 @@ case class LightsGrid(dimension: Int) {
     act(rangeLower, rangeHigher)(pair ⇒ grid(pair._1)(pair._2) = true)
   }
 
-  def lights: Int = {
-    println(s"DIM: ${dimension}")
-    println("LEN: " + iter((0, dimension - 1), (0, dimension - 1)))
-    val r = iter((0, dimension - 1), (0, dimension - 1))
-      .map(coord ⇒ {
-                val (x, y) = coord
-                println(s"x = ${x}, y = ${y} = > ${grid(x)(y)}")
-                grid(x)(y) == false
-      })
-    println(r)
-    r.length
+  def turnOff(rangeLower: Coord, rangeHigher: Coord) = {
+    act(rangeLower, rangeHigher)(pair ⇒ grid(pair._1)(pair._2) = false)
   }
 
-  def printGrid = {
-    act((0, 0), (dimension-1, dimension-1))(coord ⇒ {
-      if (coord._2 == 0)
-        println("")
-        if (grid(coord._1)(coord._2) == true)
-            print(" 1 ")
-      else
-        print(" 0 ")
-     })
-    println("")
+  def toggle(rangeLower: Coord, rangeHigher: Coord) = {
+    act(rangeLower, rangeHigher)(pair ⇒ grid(pair._1)(pair._2) = !grid(pair._1)(pair._2))
+  }
+
+  def lights: Int = {
+    iter((0, 0), (dimension - 1, dimension - 1))
+      .filter(c ⇒ grid(c._1)(c._2) == true).length
+  }
+
+  def instruction(action: String) : GridInstruction = {
+    val regex = "^([a-z ]+)([0-9]+),([0-9]+) through ([0-9]+),([0-9]+)$".r
+    action match {
+      case(regex(act, lowerX, lowerY, higherX, higherY)) ⇒
+        GridInstruction(actionStringToAction(act),
+                        (lowerX.toInt, lowerY.toInt),
+                        (higherX.toInt, higherY.toInt))
+      case(_) ⇒ throw new UnsupportedOperationException(action)
+    }
+  }
+
+  def actionStringToAction(action: String) = action match {
+    case("turn on ") ⇒ "on"
+    case(_) ⇒ throw new UnsupportedOperationException(action)
   }
 }
 
