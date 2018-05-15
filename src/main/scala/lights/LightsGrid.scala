@@ -4,7 +4,7 @@ import scala.io.Source
 
 case class LightsGrid(dimension: Int) {
 
-  private val grid = Array.ofDim[Boolean](dimension, dimension)
+  private val grid = Array.ofDim[Int](dimension, dimension)
 
   type Coord = (Int, Int)
   type Range = (Coord, Coord)
@@ -26,20 +26,20 @@ case class LightsGrid(dimension: Int) {
   }
 
   def turnOn(rangeLower: Coord, rangeHigher: Coord) = {
-    act(rangeLower, rangeHigher)(pair ⇒ grid(pair._1)(pair._2) = true)
+    act(rangeLower, rangeHigher)(pair ⇒ grid(pair._1)(pair._2) = 1)
   }
 
   def turnOff(rangeLower: Coord, rangeHigher: Coord) = {
-    act(rangeLower, rangeHigher)(pair ⇒ grid(pair._1)(pair._2) = false)
+    act(rangeLower, rangeHigher)(pair ⇒ grid(pair._1)(pair._2) = 0)
   }
 
   def toggle(rangeLower: Coord, rangeHigher: Coord) = {
-    act(rangeLower, rangeHigher)(pair ⇒ grid(pair._1)(pair._2) = !grid(pair._1)(pair._2))
+    act(rangeLower, rangeHigher)(pair ⇒ grid(pair._1)(pair._2) = 1 ^ grid(pair._1)(pair._2))
   }
 
   def lights: Int = {
     iter((0, 0), (dimension - 1, dimension - 1))
-      .filter(c ⇒ grid(c._1)(c._2) == true).length
+      .filter(c ⇒ grid(c._1)(c._2) == 1).length
   }
 
   def instructionsFromFile(filename: String): LightsGrid = {
