@@ -1,13 +1,11 @@
 package lights
 
 import scala.io.Source
+import types._
 
 case class LightsGrid(dimension: Int) {
 
-  private val grid = Array.ofDim[Int](dimension, dimension)
-
-  type Coord = (Int, Int)
-  type Range = (Coord, Coord)
+  protected val grid = Array.ofDim[Int](dimension, dimension)
 
   def iter(c: Range): Seq[Coord] = {
     val ((x1, y1), (x2, y2)) = c
@@ -59,14 +57,14 @@ case class LightsGrid(dimension: Int) {
     val regex = "^(turn on|turn off|toggle) ([0-9]+),([0-9]+) through ([0-9]+),([0-9]+)$".r
     action match {
       case(regex(act, lowerX, lowerY, higherX, higherY)) ⇒
-        GridInstruction(actionStringToAction(act),
+        GridInstruction(actionStringToOperation(act),
                         (lowerX.toInt, lowerY.toInt),
                         (higherX.toInt, higherY.toInt))
       case(_) ⇒ throw new UnsupportedOperationException(action)
     }
   }
 
-  def actionStringToAction(action: String) = action match {
+  def actionStringToOperation(action: String) = action match {
     case("turn on") ⇒ "on"
     case("turn off") ⇒ "off"
     case("toggle") => "toggle"
