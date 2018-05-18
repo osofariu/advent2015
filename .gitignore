@@ -3,3 +3,4 @@ ensime.sbt
 .ensime_cache/
 project/
 target/
+**/.DS_Store
