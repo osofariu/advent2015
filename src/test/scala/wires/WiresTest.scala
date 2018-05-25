@@ -7,7 +7,7 @@ class WiresTest extends path.FunSpec with Matchers {
   describe("a basic circuit with no gates") {
 
     val c = new Circuit
-    it("evaluates as expected") {
+    it("evaluates the one wire provided") {
       c.register("x", Assign("123"))
       c.evaluateCircuit shouldEqual(List(("x", 123)))
     }
@@ -71,6 +71,21 @@ class WiresTest extends path.FunSpec with Matchers {
     }
   }
 
+  describe("wire dependencies are maintained correctly") {
+    val c = new Circuit()
+    c.register("a", And("b", "e"))
+    c.register("d",Lshift("e", "2"))
+    c.register("e", Rshift("b", "2"))
+    c.register("f", Or("a", "b"))
+    c.register("b0", Assign("123"))
+    c.register("b", Assign("b0"))
+    c.register("c", Assign("456"))
+    it("evaluates then resets wire b0") {
+      c.evaluateCircuit
+      c.resetWire("b", 124) shouldEqual Set("f", "a", "e", "d")
+    }
+  }
+
   describe("lets have a special exception when evaluating a wire that hasn't been defined") {
     it("throws an UnknownWireException exception when trying to evaluate an undefined wire") {
       val c = new Circuit()
@@ -84,11 +99,27 @@ class WiresTest extends path.FunSpec with Matchers {
   describe("process instructions from file") {
     val circuit = new Circuit()
     it("processes every wire signal in file") {
-      println("Reading from file")
       val signals = circuit.fromFile("7_input.txt")
-      signals
-        .find(signalPair ⇒ (signalPair._1 == "a"))
-        .head._2 shouldEqual 16076
+      circuit.getSignal("a") shouldEqual 16076
+    }
+
+    it("re-evaluates a after re-setting b to a") {
+      val signals = circuit.fromFile("7_input.txt")
+      val wireASignal = circuit.getSignal("a")
+      circuit.resetWire("b", wireASignal)
+      circuit.evaluateCircuit
+      circuit.getSignal("a") shouldEqual(2797)
+    }
+  }
+
+  describe("detect cycles") {
+    it("won't evaluate a circuit with mutually-dependent wires") {
+      val circuit = new Circuit()
+      circuit.register("a", Not("b"))
+      circuit.register("b", Not("a"))
+      intercept[UnexpectedCycleException] {
+        circuit.evaluateCircuit
+      }
     }
   }
 }

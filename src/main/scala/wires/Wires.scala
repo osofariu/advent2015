@@ -1,6 +1,7 @@
 package wires
 
 import scala.collection.mutable.Map
+import scala.collection.mutable.Set
 import scala.io.Source
 
 trait Operation
@@ -14,28 +15,38 @@ case class Lshift(wire: String, bits: String) extends Operation
 
 class Circuit {
   private val wireOperations = Map[String, Operation]()
-  private val wireSignals = Map[String, Int]()
+  val signalValues = new SignalValues()
+  val wireDependencies = new WireDependencies()
 
   def fromFile(fileName: String) : List[(String, Int)]= {
     val signalInstructions = Source.fromFile(fileName).getLines.toList
     signalInstructions
       .map(instr ⇒ InstructionParser.parse(instr))
-      .foreach(wireOperation ⇒ register(wireOperation._1, wireOperation._2))
+      .foreach(register)
     evaluateCircuit
   }
 
   def evaluateCircuit = {
-    var loopCount = 0
-    while(wireSignals.size < wireOperations.size && loopCount <= wireOperations.size ) {
-      wireOperations.keys.toList.foreach(key ⇒ evaluateWire(key))
-      loopCount += 1
+    var maxLoopCount = wireOperations.size
+    while(signalValues.signalsEvaluated < wireOperations.size && maxLoopCount >= 0 ) {
+      wireOperations.keys.foreach(key ⇒ evaluateWire(key))
+      maxLoopCount -= 1
     }
-    sortByWireName(wireSignals.toList)
+    if (maxLoopCount < 0)
+      throw new UnexpectedCycleException()
+    else {
+      returnEvaluatedSignals
+    }
+  }
+
+  def resetWire(wire: String, value: Int) : Set[String]= {
+    signalValues.resetValues(wire, value, wireDependencies.getAllDependencies(wire))
   }
 
   def evaluateWire(wire: String) = {
     val op = wireOperations.get(wire)
-    if (!signalIsEvaluated(wire)) {
+    ensureSignalsExist(wire)
+    if (!signalValues.signalIsEvaluated(wire)) {
       op.get match {
         case Assign(signal)  ⇒ applyUnaryOperation(signal, signal ⇒ signal)
         case Not(other)      ⇒ applyUnaryOperation(other, BitwiseOps.not)
@@ -46,53 +57,59 @@ class Circuit {
         case Lshift(s1, num) ⇒ applyBinaryOperation(s1, num, BitwiseOps.lshift)
       }
     }
+
     def applyBinaryOperation(wire1: String, wire2: String, op: (Int, Int) ⇒ Int) = {
-      if (signalIsEvaluated(wire1) && signalIsEvaluated(wire2)) {
-        val res = op(getSignal(wire1), getSignal(wire2))
-        saveSignal(wire, res)
+      ensureSignalsExist(wire1, wire2)
+      if (signalValues.signalIsEvaluated(wire1) && signalValues.signalIsEvaluated(wire2)) {
+        val res = op(signalValues.getSignal(wire1), signalValues.getSignal(wire2))
+        signalValues.addSignal(wire, res)
+        wireDependencies.addDownstreamDepedency(wire, List(wire1, wire2))
       }
     }
+
     def applyUnaryOperation(other: String, op: Int ⇒ Int) = {
-      if (signalIsEvaluated(other)) {
-        val res = op(getSignal(other))
-        saveSignal(wire, res)
+      ensureSignalsExist(other)
+      if (signalValues.signalIsEvaluated(other)) {
+        val res = op(signalValues.getSignal(other))
+        signalValues.addSignal(wire, res)
+        wireDependencies.addDownstreamDepedency(wire, List(other))
       }
     }
   }
 
-  def wireIsKnown(wire: String) = wireOperations.get(wire).nonEmpty
+  def ensureSignalsExist(wires: String*) = {
+    wires
+      .filter(!Wires.wireIsANumber(_))
+      .foreach(
+      wire ⇒ {
+        if (wireOperations.get(wire).isEmpty)
+          throw new UnknownWireException(wire)
+      })
+  }
 
+  def register(wireOperation: (String, Operation)) = {
+    val (wire, operation) = wireOperation
+    wireOperations += (wire → operation)
+  }
+
+  def returnEvaluatedSignals =
+    signalValues.toList
+      .toList
+      .sorted((p1: (String, Int), p2: (String, Int)) ⇒ {
+                if (p1._1 < p2._1) -1
+                else if (p1._1 == p2._1) 0
+                else 1
+              })
+
+  def getSignal(wire: String) =
+    signalValues.getSignal(wire)
+}
+
+object Wires {
   val numRE = "([0-9]+)".r
 
   def wireIsANumber(wire: String) = wire match {
     case numRE(value) ⇒ true
     case _ ⇒ false
-  }
-
-  def getSignal(wire: String) = wire match {
-    case numRE(numStr) ⇒ numStr.toInt
-    case _ ⇒ wireSignals(wire)
-  }
-
-  def signalIsEvaluated(wire: String) = {
-    if (wireIsANumber(wire))
-      true
-    else if(wireIsKnown(wire))
-      wireSignals.get(wire).nonEmpty
-    else
-      throw new UnknownWireException(wire)
-  }
-
-  def saveSignal(wire: String, wireSignal: Int) =
-    wireSignals(wire) = wireSignal
-
-  def register(wire: String, operation: Operation) =
-    wireOperations += (wire → operation)
-
-  def sortByWireName(l: List[(String, Int)]) = {
-    l.sorted((p1: (String, Int), p2: (String, Int)) ⇒ {
-              if (p1._1 < p2._1) -1
-              else if (p1._1 == p2._1) 0
-              else 1})
   }
 }
