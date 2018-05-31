@@ -18,7 +18,7 @@ class LightsGridImprovedTest extends path.FunSpec with Matchers {
       it("toggles from 0, increasing by 2") {
         grid.toggle((0, 0), (1, 1)).lights shouldEqual 8
       }
-    }
+   }
     describe("turn off") {
       it("from scratch, it doesn't go below 0") {
         grid.turnOff((0, 0), (9, 9)).lights shouldEqual 0
@@ -32,7 +32,7 @@ class LightsGridImprovedTest extends path.FunSpec with Matchers {
     describe("from File") {
       it("can add-up lights the new way") {
       val grid = LightsGridImproved(1000)
-        grid.instructionsFromFile("6_input.txt").lights shouldEqual 17836115
+        grid.instructionsFromFile("input/6_input.txt").lights shouldEqual 17836115
       }
     }
   }

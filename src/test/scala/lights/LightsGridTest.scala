@@ -82,7 +82,7 @@ class LightsGridTest extends path.FunSpec with Matchers {
     describe("read the instructions from file") {
       it("reads from file into a 1,000 X 1,000 grid") {
         val grid = LightsGrid(1000)
-        grid.instructionsFromFile("6_input.txt").lights shouldEqual(569999)
+        grid.instructionsFromFile("input/6_input.txt").lights shouldEqual(569999)
       }
     }
   }

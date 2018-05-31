@@ -36,7 +36,7 @@ class NiceStringTest extends path.FunSpec with Matchers {
 
   describe("from file, expectation of nice words") {
     it("has nice Words") {
-      val niceWords = NiceString.niceFile("5_input.txt")
+      val niceWords = NiceString.niceFile("input/5_input.txt")
       niceWords shouldEqual(236)
     }
   }

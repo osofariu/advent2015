@@ -99,12 +99,12 @@ class WiresTest extends path.FunSpec with Matchers {
   describe("process instructions from file") {
     val circuit = new Circuit()
     it("processes every wire signal in file") {
-      val signals = circuit.fromFile("7_input.txt")
+      val signals = circuit.fromFile("input/7_input.txt")
       circuit.getSignal("a") shouldEqual 16076
     }
 
     it("re-evaluates a after re-setting b to a") {
-      val signals = circuit.fromFile("7_input.txt")
+      val signals = circuit.fromFile("input/7_input.txt")
       val wireASignal = circuit.getSignal("a")
       circuit.resetWire("b", wireASignal)
       circuit.evaluateCircuit
