@@ -21,12 +21,12 @@ class CharStatsTest extends path.FunSpec with Matchers {
 
   describe("Calculate Char Stats for file") {
     it("adds-up all Encoded Chars generated from file") {
-      val statsForFile = CharStats.spaceForFile("8_input.txt")
+      val statsForFile = CharStats.spaceForFile("input/8_input.txt")
       statsForFile.code - statsForFile.memory shouldEqual 1342
     }
 
     it("adds-up sll Encoded Chars generated from file after re-encoding them") {
-      val reEncodedStatsForFile = CharStats.reEncodedStatsForFile("8_input.txt")
+      val reEncodedStatsForFile = CharStats.reEncodedStatsForFile("input/8_input.txt")
       reEncodedStatsForFile.code - reEncodedStatsForFile.memory shouldEqual 2074
     }
   }

@@ -51,7 +51,7 @@ class BuildingDeliveryTest extends path.FunSpec with Matchers {
   }
 
   describe("processing a file with moves") {
-    val delivery = BuildingDelivery.fromFile("1_input.txt")
+    val delivery = BuildingDelivery.fromFile("input/1_input.txt")
 
     it("gives the final floor") {
       val positions = delivery.finalFloorVisited

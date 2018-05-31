@@ -40,7 +40,7 @@ class BetterNiceStringsTest extends path.FunSpec with Matchers {
 
   describe("grand finale -- work on the file") {
     it("gives some answer, hope its right") {
-      BetterNiceString.niceFile("5_input.txt") shouldEqual(51)
+      BetterNiceString.niceFile("input/5_input.txt") shouldEqual(51)
     }
   }
 }
