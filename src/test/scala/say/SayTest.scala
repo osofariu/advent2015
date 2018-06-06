@@ -21,7 +21,7 @@ class SayTest extends path.FunSpec with Matchers {
 //    }
 
     it("works on the expected input") {
-      Say.repeatSay("1321131112", 25) shouldEqual(10)
+      Say.repeatSay("1321131112", 40) shouldEqual(10)
     }
   }
 }
